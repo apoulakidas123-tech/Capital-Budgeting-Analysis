@@ -1,10 +1,8 @@
 # Capital Budgeting Analysis
 
-A Python project that processes capital budgeting Excel data and calculates key financial metrics such as **Average**, **Standard Deviation**, and **Net Present Value (NPV)**.
+A Python project that processes capital budgeting Excel data and calculates key financial metrics: **Average**, **Standard Deviation**, and **Net Present Value (NPV)**.
 
----
-
-# Project Structure
+## Project Structure
 
 ```
 capital_budgeting_project/
@@ -13,133 +11,111 @@ capital_budgeting_project/
 │   ├── 2021-2030 Budget Data.xlsx
 │   └── Tables_A.1_A.2_Teekay_13_25_year_capital_budgeting_plan.xls
 │
-├── main.py
-├── teekay_irr_scenarios.py
-├── requirements.txt
-├── .gitignore
-└── README.md
+├── main.py                  # Full capital budgeting + DoD analysis
+├── teekay_irr_scenarios.py  # Standalone IRR scenarios for Teekay 13-year project
+├── requirements.txt         # Dependencies for the project
+├── .gitignore               # To exclude unnecessary files
+└── README.md                # Project description and usage instructions
 ```
 
----
+## Setup
 
-# Setup
+### 1. Create and activate the virtual environment
 
-## 1. Create and Activate Virtual Environment
+**Windows (PowerShell)**
 
-### Windows (PowerShell)
-
-```
+```powershell
 cd E:\capital_budgeting_project
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-### macOS / Linux
+**macOS / Linux**
 
-```
+```bash
 cd capital_budgeting_project
 python3 -m venv venv
 source venv/bin/activate
 ```
 
----
+### 2. Install dependencies
 
-## 2. Install Dependencies
-
-```
+```bash
 pip install -r requirements.txt
 ```
 
----
+### 3. Add Excel data files
 
-## 3. Add Excel Data Files
+Place the following files inside the `data/` folder:
 
-Place the following files inside the **data/** folder:
+- `2021-2030 Budget Data.xlsx`
+- `Tables_A.1_A.2_Teekay_13_25_year_capital_budgeting_plan.xls`
 
-* `2021-2030 Budget Data.xlsx`
-* `Tables_A.1_A.2_Teekay_13_25_year_capital_budgeting_plan.xls`
+## Usage
 
----
-
-# Usage
-
-## 1. Full Analysis
+### 1. Full analysis (`main.py`)
 
 Run the full analysis from the project root:
 
-```
+```bash
 python main.py
 ```
 
-### What `main.py` Does
+### What `main.py` does
 
-* Loads Excel files from the **data/** directory
-* Validates the Teekay 13-year and 25-year sheets
-* Calculates **Average** and **Standard Deviation** for:
+1. **Loads** both Excel files from the `data/` directory.
+2. **Validates** the Teekay 13-year and 25-year sheets (row labels, year columns, numeric values).
+3. **Calculates** the average and sample standard deviation of:
+   - Charter Revenue
+   - Total Operating Costs
+   - Project After-Tax Operating Income
+   for both the 13-year and 25-year Teekay plans.
+4. **Reads** the cost of capital (%), if present, from the Teekay sheets (falls back to **7%** if not found).
+5. **Calculates** the Net Present Value (NPV) of the Teekay 13-year and 25-year net cash flows at the detected cost of capital.
+6. **Summarises** the 2021-2030 DoD budget data (average and standard deviation across fiscal years for every budget category in each sheet).
+7. **Exports** the results to the `results/` folder as Excel workbooks:
+   - `teekay_capital_budgeting_stats_and_npv.xlsx` (Teekay stats with bold column headers)
+   - `dod_budget_category_stats.xlsx` (DoD budget stats with bold column headers)
+   - `capital_budgeting_analysis.xlsx` (combined workbook with separate sheets for Teekay stats and DoD budget stats, headers bold)
 
-  * Charter Revenue
-  * Total Operating Costs
-  * Project After-Tax Operating Income
-* Detects the **Cost of Capital (%)** (default 7% if not found)
-* Calculates **Net Present Value (NPV)** for both projects
-* Processes **2021-2030 budget data**
-* Generates statistical summaries
-* Exports results to Excel files in the **results/** folder
+> **Note:** If a CSV or the Excel file is open in Excel while you run `python main.py`, Windows may raise a *PermissionError*. Close the file and run the script again.
 
-### Output Files
+### 2. Standalone IRR scenarios (`teekay_irr_scenarios.py`)
 
-* `teekay_capital_budgeting_stats_and_npv.xlsx`
-* `dod_budget_category_stats.xlsx`
-* `capital_budgeting_analysis.xlsx`
+Run only the Teekay 13-year IRR scenarios analysis:
 
-**Note:** If any Excel file is open while running the script, Windows may raise a **PermissionError**. Close the file and run the script again.
-
----
-
-# IRR Scenario Analysis
-
-Run the standalone IRR scenarios script:
-
-```
+```bash
 python teekay_irr_scenarios.py
 ```
 
-### What This Script Does
+What this script does:
 
-* Loads the **Teekay 13-year sheet**
-* Extracts **Net Cash Flow**
-* Calculates **Internal Rate of Return (IRR)**
-* Runs multiple **cost-of-capital scenarios**
+1. **Loads** the Teekay 13-year sheet from `Tables_A.1_A.2_Teekay_13_25_year_capital_budgeting_plan.xls`.
+2. **Extracts** the `Net Cash Flow` row, drops any empty / non-numeric cells, and uses the resulting cash-flow series as the 13-year project cash flows.
+3. **Computes** the internal rate of return (**IRR**) once, holding all cash flows constant.
+4. **Loops** over three cost-of-capital scenarios using a conditional structure:
+   - Scenario #1: Cost of capital **7%**
+   - Scenario #2: Cost of capital **5%**
+   - Scenario #3: Cost of capital **2%**
+5. **Calculates** the NPV of the same cash flows at each scenario’s cost of capital.
+6. **Prints** a clean table to the console with:
+   - `Scenario`
+   - `CostOfCapital`
+   - `IRR`
+   - `NPV_at_CostOfCapital`
+7. **Exports** the IRR scenarios table to the `results/` folder as a formatted Excel file:
+   - `teekay_irr_scenarios.xlsx`
 
-### Scenarios
+## Results Summary
 
-| Scenario   | Cost of Capital |
-| ---------- | --------------- |
-| Scenario 1 | 7%              |
-| Scenario 2 | 5%              |
-| Scenario 3 | 2%              |
+## Dependencies
 
-For each scenario the script calculates:
+| Package  | Purpose                                  |
+|----------|------------------------------------------|
+| pandas   | Data manipulation and analysis           |
+| numpy    | Mathematical calculations                |
+| openpyxl | Reading / writing `.xlsx` files          |
+| xlrd     | Reading legacy `.xls` files              |
+| scipy    | Advanced calculations (if needed)        |
 
-* IRR
-* NPV at that cost of capital
 
-### Output
-
-Exports a formatted Excel file:
-
-```
-results/teekay_irr_scenarios.xlsx
-```
-
----
-
-# Dependencies
-
-| Package  | Purpose                           |
-| -------- | --------------------------------- |
-| pandas   | Data manipulation and analysis    |
-| numpy    | Mathematical calculations         |
-| openpyxl | Reading and writing `.xlsx` files |
-| xlrd     | Reading legacy `.xls` files       |
-| scipy    | Advanced numerical calculations   |
